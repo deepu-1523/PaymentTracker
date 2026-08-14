@@ -38,6 +38,24 @@ if (process.env.NODE_ENV !== 'test') {
   app.use(morgan('dev'));
 }
 
+// Serverless DB Connection Middleware: Ensures MongoDB is connected on every Vercel invocation
+app.use(async (req, res, next) => {
+  // Allow health check and root check without blocking
+  if (req.path === '/api/health' || req.path === '/' || req.method === 'OPTIONS') {
+    return next();
+  }
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('[DB Middleware Error]:', err.message);
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Database connection error. Please verify MONGODB_URI.',
+    });
+  }
+});
+
 // Rate limiter for authentication to protect against brute force
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 mins
@@ -56,19 +74,27 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportRoutes);
 
 // Health check endpoint (for deployment monitoring)
-app.get('/api/health', (req, res) => {
-  const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+app.get('/api/health', async (req, res) => {
+  let dbStatus = 'disconnected';
+  try {
+    await connectDB();
+    dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+  } catch (err) {
+    dbStatus = `error: ${err.message}`;
+  }
+
   res.status(200).json({
     status: 'ok',
-    app: 'DueLedger API',
+    app: 'DueLedger API (Vercel Serverless Ready)',
     database: dbStatus,
-    environment: process.env.NODE_ENV || 'development',
+    environment: process.env.NODE_ENV || 'production',
+    isVercel: !!process.env.VERCEL,
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
 });
 
-// Serve frontend static build if present (for single-service deployment on Render / Railway / Heroku)
+// Serve frontend static build if present (for single-service deployment)
 const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
 if (fs.existsSync(frontendDistPath)) {
   app.use(express.static(frontendDistPath));
@@ -82,7 +108,7 @@ if (fs.existsSync(frontendDistPath)) {
   // Root greeting when backend is deployed independently
   app.get('/', (req, res) => {
     res.json({
-      message: 'DueLedger REST API is active and operational.',
+      message: 'DueLedger REST API is active and operational on Vercel.',
       healthCheck: '/api/health',
     });
   });
@@ -112,8 +138,8 @@ export const startServer = async () => {
   return server;
 };
 
-// Start automatically if executed directly
-if (process.env.NODE_ENV !== 'test') {
+// Start automatically if executed directly outside serverless environment
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   startServer();
 }
 
