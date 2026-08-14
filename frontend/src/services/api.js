@@ -1,4 +1,6 @@
-const API_BASE_URL = '/api';
+// In production (Vercel/Netlify), VITE_API_URL points to the backend (e.g. https://your-api.onrender.com/api)
+// In local development or unified deployment, it defaults to '/api'
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
 
 const getHeaders = () => {
   const token = localStorage.getItem('dueledger_token');

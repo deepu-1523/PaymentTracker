@@ -14,16 +14,14 @@ A private, transaction-based web application and Admin command center for tracki
 1. **Transaction-Based Balance Calculation Engine**:
    - Dynamic formula: $\text{Remaining} = \text{Agreed Amount} - \sum(\text{Transactions})$.
    - Never manual or out-of-sync: edits and deletions reactively recompute balances.
-2. **Automatic Dynamic Status State Machine**:
-   - `Paid` (100% recovered)
-   - `Partial` (Partial payments received, before due date)
-   - `Pending` (Awaiting initial payment, before due date)
-   - `Overdue` (Balance pending past scheduled due date)
+2. **Two-Way Ledger Support**:
+   - 🟢 **Who Borrowed From Me (Receivables)**: Money you will receive.
+   - 🔴 **Which I Have Borrowed (Payables)**: Money you need to repay.
+   - ⚖️ **Net Position**: Real-time Surplus/Deficit.
 3. **Executive Admin Dashboard**:
+   - Single-screen master view with live cashflow ribbon and split-screen dossier.
    - KPI Stat cards with Indian Rupee (`₹`) formatting.
-   - Monthly Collection Trend bar chart.
    - Action Radar for Due Today, Due within 7 Days, and Urgent Overdue follow-ups.
-   - Top 5 Outstanding Debtors leaderboard.
 4. **Client Dossier & Ledger Timeline**:
    - Complete contact card, payment progress bar, notes, and full payment history.
 5. **Instant WhatsApp Reminder Generator**:
@@ -32,7 +30,6 @@ A private, transaction-based web application and Admin command center for tracki
    - One-click `wa.me` chat launcher.
 6. **Financial Reports & Exports**:
    - Daily, Weekly, Monthly, and All-Time collection analytics.
-   - Payment method distribution chart (UPI vs Cash vs Bank Transfer vs Card).
    - 1-Click CSV Exports for Client Ledger and Payment Audit Log.
    - 1-Click PDF Statement Generator and printable Payment Receipts.
 
@@ -50,7 +47,6 @@ Clone the repository and install all dependencies:
 # In the root project directory:
 npm run install:all
 ```
-*(Or navigate into `backend` and `frontend` separately and run `npm install`)*
 
 ### 3. Running Locally
 Start both backend and frontend concurrently or in separate terminals:
@@ -71,9 +67,16 @@ npm run dev
 
 ---
 
+## 🌐 Production Deployment Guide
+
+For full instructions on deploying the Backend (e.g. Render / Railway) and Frontend (e.g. Vercel / Netlify) without login errors, refer to:
+📖 **[Production Deployment Guide](file:///c:/Users/chaur/Desktop/PAYMENT/docs/DEPLOYMENT_GUIDE.md)**
+
+---
+
 ## 🧪 Running Automated Tests
 
-Run the test suite verifying all calculation rules, partial payment accumulations, and WhatsApp message formatting:
+Run the test suite verifying all calculation rules, two-way ledger balances, and WhatsApp message formatting:
 ```bash
 cd backend
 npm test
@@ -81,42 +84,8 @@ npm test
 
 ---
 
-## 📁 Repository Structure
-
-```
-PAYMENT/
-├── backend/
-│   ├── src/
-│   │   ├── config/          # MongoDB connection & memory fallback
-│   │   ├── controllers/     # Auth, Clients, Payments, Dashboard, Reports
-│   │   ├── middleware/      # JWT auth guard & rate limiting
-│   │   ├── models/          # User, Client, Payment, Reminder schemas
-│   │   ├── routes/          # Express route definitions
-│   │   ├── services/        # Ledger calculation & WhatsApp template engine
-│   │   ├── tests/           # Unit & calculation test suite
-│   │   └── server.js        # Server entrypoint
-│   └── package.json
-├── frontend/
-│   ├── src/
-│   │   ├── components/      # Sidebar, Navbar, StatCard, Modals (Payment, Client, WhatsApp, Receipt)
-│   │   ├── context/         # AuthContext & ToastContext
-│   │   ├── pages/           # Dashboard, Clients, ClientDetail, Payments, DueTracker, Reports, Settings, Auth
-│   │   ├── services/        # API client & CSV/PDF Export helpers
-│   │   ├── styles/          # Responsive Glassmorphic Dark UI
-│   │   ├── App.jsx          # App root orchestrator
-│   │   └── main.jsx         # React DOM entrypoint
-│   └── vite.config.js
-├── docs/
-│   ├── ARCHITECTURE.md      # System design, data schema & calculation rules
-│   ├── API_DOCUMENTATION.md # REST API endpoint specifications
-│   ├── USER_GUIDE.md        # Admin operator manual
-│   └── PROJECT_LOG.md       # Development progress and milestone log
-└── README.md
-```
-
----
-
 ## 📚 Documentation Links
+- [Production Deployment Guide](file:///c:/Users/chaur/Desktop/PAYMENT/docs/DEPLOYMENT_GUIDE.md)
 - [System Architecture](file:///c:/Users/chaur/Desktop/PAYMENT/docs/ARCHITECTURE.md)
 - [REST API Documentation](file:///c:/Users/chaur/Desktop/PAYMENT/docs/API_DOCUMENTATION.md)
 - [User Guide](file:///c:/Users/chaur/Desktop/PAYMENT/docs/USER_GUIDE.md)
