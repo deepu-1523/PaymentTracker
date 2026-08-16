@@ -1,9 +1,17 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+// Ensure reliable DNS resolution for MongoDB Atlas SRV records
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1']);
+} catch (e) {
+  // Ignore in environments where setting custom DNS servers is restricted
+}
 
 let memoryServerInstance = null;
 
 export const connectDB = async () => {
-  // If already connected (cached in serverless container), reuse connection
+  // If already connected, reuse connection
   if (mongoose.connection.readyState === 1) {
     return mongoose.connection;
   }
@@ -45,11 +53,12 @@ export const connectDB = async () => {
         return conn;
       } catch (memErr) {
         console.error('[Database] Embedded MongoDB failed to start:', memErr);
+        throw memErr;
       }
     }
-  } else {
-    throw new Error('Missing MONGODB_URI environment variable on Vercel. Please add MONGODB_URI in your Vercel Project Settings -> Environment Variables.');
   }
+
+  throw new Error('Missing MONGODB_URI environment variable on Vercel. Please add MONGODB_URI in your Vercel Project Settings -> Environment Variables.');
 };
 
 export const closeDB = async () => {

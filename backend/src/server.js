@@ -132,7 +132,7 @@ export const startServer = async () => {
     console.error('[Startup Error]:', err.message);
   }
 
-  const server = app.listen(PORT, () => {
+  const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`[DueLedger Backend] Server operational on port ${PORT}`);
   });
   return server;
