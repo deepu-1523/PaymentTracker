@@ -66,15 +66,23 @@ const authLimiter = rateLimit({
   },
 });
 
-// API Routes
+// API Routes (mounted with /api and direct prefix for Vercel Serverless compatibility)
 app.use('/api/auth', authLimiter, authRoutes);
-app.use('/api/clients', clientRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/reports', reportRoutes);
+app.use('/auth', authLimiter, authRoutes);
 
-// Health check endpoint (for deployment monitoring)
-app.get('/api/health', async (req, res) => {
+app.use('/api/clients', clientRoutes);
+app.use('/clients', clientRoutes);
+
+app.use('/api/payments', paymentRoutes);
+app.use('/payments', paymentRoutes);
+
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/dashboard', dashboardRoutes);
+
+app.use('/api/reports', reportRoutes);
+app.use('/reports', reportRoutes);
+
+const healthHandler = async (req, res) => {
   let dbStatus = 'disconnected';
   try {
     await connectDB();
@@ -92,7 +100,10 @@ app.get('/api/health', async (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
-});
+};
+
+app.get('/api/health', healthHandler);
+app.get('/health', healthHandler);
 
 // Serve frontend static build if present (for single-service deployment)
 const frontendDistPath = path.resolve(__dirname, '../../frontend/dist');
